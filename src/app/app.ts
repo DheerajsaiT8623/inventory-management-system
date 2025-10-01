@@ -1,8 +1,7 @@
 
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { RouterModule } from '@angular/router';
-import { DashboardComponent } from './dashboard.component';
+import { RouterOutlet, RouterModule } from '@angular/router';
+import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({

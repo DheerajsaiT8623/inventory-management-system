@@ -1,0 +1,48 @@
+<div class="login-container">
+  <h2>Welcome Back!</h2>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="animated-form">
+    <div class="input-group">
+      <input formControlName="name" placeholder="Enter your name" required 
+             [class.invalid]="loginForm.get('name')?.invalid && loginForm.get('name')?.touched"/>
+      <div class="error-message" *ngIf="loginForm.get('name')?.invalid && loginForm.get('name')?.touched">
+        Please enter your name
+      </div>
+    </div>
+
+    <div class="input-group">
+      <input formControlName="email" placeholder="Enter your email" required type="email"
+             [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"/>
+      <div class="error-message" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+        Please enter a valid email
+      </div>
+    </div>
+
+    <div class="input-group">
+      <select formControlName="role" required
+              [class.invalid]="loginForm.get('role')?.invalid && loginForm.get('role')?.touched">
+        <option value="">Choose your role</option>
+        <option value="buyer">🛒 Buyer</option>
+        <option value="seller">💼 Seller</option>
+      </select>
+      <div class="error-message" *ngIf="loginForm.get('role')?.invalid && loginForm.get('role')?.touched">
+        Please select a role
+      </div>
+    </div>
+
+    <button type="submit" 
+            [disabled]="loginForm.invalid"
+            [class.loading]="isLoading">
+      <span *ngIf="!isLoading">Login</span>
+      <span *ngIf="isLoading">Logging in...</span>
+    </button>
+  </form>
+
+  <div class="available-products">
+  </div>
+
+  <div *ngIf="showRepeatPopup" class="popup" @fadeSlide>
+    <p>👋 Welcome back! You're already registered with us.</p>
+    <button (click)="closePopup()">Continue</button>
+  </div>
+</div>

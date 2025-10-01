@@ -1,9 +1,10 @@
 
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { UserService } from './user.service';
-import { User, Product } from './models';
+import { UserService } from '../../core/services/user.service';
+import { User, Product } from '../../core/models/models';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 
 @Component({
@@ -16,23 +17,28 @@ import { CommonModule, TitleCasePipe } from '@angular/common';
 export class DashboardComponent {
   currentUser: User | null = null;
   products$: Observable<Product[]>;
-  sellerProducts: Product[] = [];
-  productForm: FormGroup;
+  sellerProducts: any[] = [];
+  productForm!: FormGroup;
   buyForms: { [productId: number]: FormGroup } = {};
   buyMessage = '';
 
-  constructor(private userService: UserService, private fb: FormBuilder) {
+  constructor(private userService: UserService, private fb: FormBuilder, private router: Router) {
     this.products$ = this.userService.products$;
     const userStr = localStorage.getItem('currentUser');
     this.currentUser = userStr ? JSON.parse(userStr) : null;
-
+    if (!this.currentUser) {
+      this.router.navigate(['/']);
+      return;
+    }
     // For sellers, filter their products
     this.products$.subscribe(products => {
       if (this.currentUser?.role === 'seller') {
-        this.sellerProducts = products.filter(p => p.sellerId === this.currentUser?.id);
-      }
-      if (this.currentUser?.role === 'buyer') {
+        this.sellerProducts = this.userService.getSellerProductStats(this.currentUser.id);
+        // Sellers should not see or interact with buy forms
+        this.buyForms = {};
+      } else if (this.currentUser?.role === 'buyer') {
         // Setup buy forms for each product
+        this.sellerProducts = [];
         products.forEach(product => {
           if (!this.buyForms[product.id]) {
             this.buyForms[product.id] = this.fb.group({
@@ -42,7 +48,6 @@ export class DashboardComponent {
         });
       }
     });
-
     this.productForm = this.fb.group({
       name: ['', Validators.required],
       description: ['', Validators.required],
@@ -52,7 +57,7 @@ export class DashboardComponent {
   }
 
   onAddProduct() {
-    if (this.productForm.valid && this.currentUser) {
+    if (this.productForm.valid && this.currentUser && this.currentUser.role === 'seller') {
       const { name, description, price, quantity } = this.productForm.value;
       this.userService.addProduct({
         name,
@@ -66,6 +71,7 @@ export class DashboardComponent {
   }
 
   onBuyProduct(productId: number) {
+    if (this.currentUser?.role !== 'buyer') return;
     const form = this.buyForms[productId];
     if (form && form.valid) {
       const quantity = +form.value.quantity;
