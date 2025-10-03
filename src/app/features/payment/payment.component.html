@@ -1,0 +1,172 @@
+<div class="payment-container" *ngIf="!paymentSuccess">
+  <div class="payment-header">
+    <button class="back-btn" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </button>
+    <h1>
+      <i class="fas fa-credit-card"></i>
+      Complete Your Payment
+    </h1>
+  </div>
+
+  <div class="payment-content">
+    <!-- Order Summary -->
+    <div class="order-summary" *ngIf="product">
+      <h2>Order Summary</h2>
+      <div class="product-details">
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+        <div class="pricing">
+          <span class="price">₹{{ product.price }} × {{ quantity }}</span>
+          <span class="total">Total: ₹{{ totalAmount }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Form -->
+    <div class="payment-form">
+      <h2>Payment Details</h2>
+      <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Card Information -->
+        <div class="form-section">
+          <h3>Card Information</h3>
+          <div class="form-group">
+            <label>Card Number</label>
+            <input 
+              formControlName="cardNumber" 
+              placeholder="1234 5678 9012 3456" 
+              maxlength="16"
+              type="text">
+            <div class="error" *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched">
+              Please enter a valid 16-digit card number
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Expiry Date</label>
+              <input 
+                formControlName="expiryDate" 
+                placeholder="MM/YY"
+                maxlength="5"
+                type="text">
+              <div class="error" *ngIf="paymentForm.get('expiryDate')?.invalid && paymentForm.get('expiryDate')?.touched">
+                Please enter MM/YY format
+              </div>
+            </div>
+            <div class="form-group">
+              <label>CVV</label>
+              <input 
+                formControlName="cvv" 
+                placeholder="123"
+                maxlength="3"
+                type="password">
+              <div class="error" *ngIf="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched">
+                Please enter 3-digit CVV
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Card Holder Name</label>
+            <input 
+              formControlName="cardHolder" 
+              placeholder="Enter name as on card"
+              type="text">
+            <div class="error" *ngIf="paymentForm.get('cardHolder')?.invalid && paymentForm.get('cardHolder')?.touched">
+              Card holder name is required
+            </div>
+          </div>
+        </div>
+
+        <!-- Billing Address -->
+        <div class="form-section">
+          <h3>Billing Address</h3>
+          <div class="form-group">
+            <label>Address</label>
+            <textarea 
+              formControlName="billingAddress" 
+              placeholder="Enter your billing address"
+              rows="3"></textarea>
+            <div class="error" *ngIf="paymentForm.get('billingAddress')?.invalid && paymentForm.get('billingAddress')?.touched">
+              Billing address is required
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>City</label>
+              <input 
+                formControlName="city" 
+                placeholder="Enter city"
+                type="text">
+              <div class="error" *ngIf="paymentForm.get('city')?.invalid && paymentForm.get('city')?.touched">
+                City is required
+              </div>
+            </div>
+            <div class="form-group">
+              <label>State</label>
+              <input 
+                formControlName="state" 
+                placeholder="Enter state"
+                type="text">
+              <div class="error" *ngIf="paymentForm.get('state')?.invalid && paymentForm.get('state')?.touched">
+                State is required
+              </div>
+            </div>
+            <div class="form-group">
+              <label>PIN Code</label>
+              <input 
+                formControlName="pincode" 
+                placeholder="123456"
+                maxlength="6"
+                type="text">
+              <div class="error" *ngIf="paymentForm.get('pincode')?.invalid && paymentForm.get('pincode')?.touched">
+                Please enter valid 6-digit PIN code
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Actions -->
+        <div class="payment-actions">
+          <button type="button" class="cancel-btn" (click)="goBack()" [disabled]="isProcessing">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="pay-btn" 
+            [disabled]="paymentForm.invalid || isProcessing"
+            [class.processing]="isProcessing">
+            <span *ngIf="!isProcessing">
+              <i class="fas fa-lock"></i>
+              Pay ₹{{ totalAmount }}
+            </span>
+            <span *ngIf="isProcessing">
+              <i class="fas fa-spinner fa-spin"></i>
+              Processing Payment...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Success -->
+<div class="payment-success" *ngIf="paymentSuccess">
+  <div class="success-content">
+    <div class="success-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h1>Payment Successful!</h1>
+    <p>Thank you for your purchase. You will be redirected to the dashboard shortly.</p>
+    <div class="order-details" *ngIf="product">
+      <h3>Order Details</h3>
+      <p><strong>Product:</strong> {{ product.name }}</p>
+      <p><strong>Quantity:</strong> {{ quantity }}</p>
+      <p><strong>Total Paid:</strong> ₹{{ totalAmount }}</p>
+    </div>
+  </div>
+</div>

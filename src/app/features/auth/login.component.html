@@ -1,0 +1,97 @@
+<div class="login-container">
+  <h2>{{ isSignupMode ? 'Create Your Account' : 'Welcome Back!' }}</h2>
+
+  <!-- Sign In Form (Existing Users) -->
+  <form *ngIf="!isSignupMode" [formGroup]="loginForm" (ngSubmit)="onSignIn()" class="animated-form">
+    <div class="input-group">
+      <input formControlName="email" placeholder="Enter your email" required type="email"
+             [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"/>
+      <div class="error-message" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+        Please enter a valid email
+      </div>
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <button type="submit" 
+            [disabled]="loginForm.invalid"
+            [class.loading]="isLoading">
+      <span *ngIf="!isLoading">Sign In</span>
+      <span *ngIf="isLoading">Signing in...</span>
+    </button>
+  </form>
+
+  <!-- Sign Up Form (New Users) -->
+  <form *ngIf="isSignupMode" [formGroup]="signupForm" (ngSubmit)="onSignUp()" class="animated-form">
+    <div class="input-group">
+      <input formControlName="name" placeholder="Full name" required 
+             [class.invalid]="signupForm.get('name')?.invalid && signupForm.get('name')?.touched"/>
+      <div class="error-message" *ngIf="signupForm.get('name')?.invalid && signupForm.get('name')?.touched">
+        Please enter your name
+      </div>
+    </div>
+
+    <div class="input-group">
+      <input formControlName="email" placeholder="Email address" required type="email"
+             [class.invalid]="signupForm.get('email')?.invalid && signupForm.get('email')?.touched"/>
+      <div class="error-message" *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched">
+        Please enter a valid email
+      </div>
+    </div>
+
+    <div class="input-group">
+      <select formControlName="role" required
+              [class.invalid]="signupForm.get('role')?.invalid && signupForm.get('role')?.touched">
+        <option value="">Choose your role</option>
+        <option value="buyer">🛒 Buyer</option>
+        <option value="seller">💼 Seller</option>
+      </select>
+      <div class="error-message" *ngIf="signupForm.get('role')?.invalid && signupForm.get('role')?.touched">
+        Please select a role
+      </div>
+    </div>
+
+    <div class="input-group">
+      <input formControlName="phone" placeholder="Phone number" required type="tel"
+             [class.invalid]="signupForm.get('phone')?.invalid && signupForm.get('phone')?.touched"/>
+      <div class="error-message" *ngIf="signupForm.get('phone')?.invalid && signupForm.get('phone')?.touched">
+        Please enter a valid phone number
+      </div>
+    </div>
+
+    <div class="input-group">
+      <input formControlName="company" placeholder="Company name (optional)"
+             [class.invalid]="signupForm.get('company')?.invalid && signupForm.get('company')?.touched"/>
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <button type="submit" 
+            [disabled]="signupForm.invalid"
+            [class.loading]="isLoading">
+      <span *ngIf="!isLoading">Sign Up</span>
+      <span *ngIf="isLoading">Creating account...</span>
+    </button>
+  </form>
+
+  <!-- Mode Toggle -->
+  <div class="toggle-mode">
+    <p *ngIf="!isSignupMode">
+      Don't have an account? 
+      <button type="button" class="link-button" (click)="toggleMode()">Sign Up</button>
+    </p>
+    <p *ngIf="isSignupMode">
+      Already have an account? 
+      <button type="button" class="link-button" (click)="toggleMode()">Sign In</button>
+    </p>
+  </div>
+
+  <div *ngIf="showRepeatPopup" class="popup">
+    <p>👋 Welcome back! You're already registered with us.</p>
+    <button (click)="closePopup()">Continue</button>
+  </div>
+</div>

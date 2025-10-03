@@ -1,0 +1,218 @@
+<div class="dashboard">
+  <ng-container *ngIf="ready; else loading">
+    <h1>Welcome, {{ currentUser?.name }} 
+      <span class="role-badge" [class.seller]="isSeller" [class.buyer]="isBuyer">
+        {{ currentUser?.role | titlecase }}
+      </span>
+    </h1>
+
+    <ng-container *ngIf="isSeller">
+    <!-- Seller Profile Stats -->
+    <section class="seller-stats">
+      <h2>
+        <i class="fas fa-chart-line"></i>
+        Your Business Overview
+      </h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-box"></i>
+          </div>
+          <div class="stat-info">
+            <h3>{{ getTotalProducts() }}</h3>
+            <p>Total Products</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <div class="stat-info">
+            <h3>{{ getTotalSales() }}</h3>
+            <p>Total Sales</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-rupee-sign"></i>
+          </div>
+          <div class="stat-info">
+            <h3>₹{{ getTotalRevenue() }}</h3>
+            <p>Total Revenue</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-warehouse"></i>
+          </div>
+          <div class="stat-info">
+            <h3>{{ getTotalInventory() }}</h3>
+            <p>Stock Remaining</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="seller-section">
+      <h2>
+        <i class="fas fa-box"></i>
+        Your Product Inventory
+      </h2>
+      <div class="products-grid">
+        <div *ngFor="let product of sellerProducts" class="product-card">
+          <div class="product-image" *ngIf="product.imageUrl">
+            <img [src]="product.imageUrl" [alt]="product.name">
+          </div>
+          <div class="product-image placeholder" *ngIf="!product.imageUrl">
+            <i class="fas fa-image"></i>
+          </div>
+          <div class="product-details">
+            <h3>{{ product.name }}</h3>
+            <p class="description">{{ product.description }}</p>
+            <div class="price-tag">₹{{ product.price }}</div>
+            <div class="product-stats">
+              <span class="stat-item">
+                <i class="fas fa-shopping-cart"></i>
+                Sold: <b>{{ product.sold }}</b>
+              </span>
+              <span class="stat-item">
+                <i class="fas fa-box-open"></i>
+                Stock: <b>{{ product.remaining }}</b>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add New Product Form -->
+      <div class="add-product-section">
+        <h3>
+          <i class="fas fa-plus-circle"></i>
+          Add New Product
+        </h3>
+        <form [formGroup]="productForm" (ngSubmit)="onAddProduct()" class="add-product-form">
+          <!-- Image Upload -->
+          <div class="image-upload-section">
+            <label class="image-upload-label">Product Image (Optional)</label>
+            <div class="image-upload-area" *ngIf="!imagePreview">
+              <input type="file" id="productImage" accept="image/*" (change)="onImageSelected($event)" hidden>
+              <label for="productImage" class="upload-btn">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Click to upload image
+              </label>
+            </div>
+            <div class="image-preview" *ngIf="imagePreview">
+              <img [src]="imagePreview" alt="Product preview">
+              <button type="button" class="remove-image" (click)="removeImage()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <input formControlName="name" placeholder="Product Name" required />
+            <div class="error-message" *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched">
+              Product name is required
+            </div>
+          </div>
+          <div class="form-group">
+            <textarea formControlName="description" placeholder="Product Description" required rows="3"></textarea>
+            <div class="error-message" *ngIf="productForm.get('description')?.invalid && productForm.get('description')?.touched">
+              Description is required
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <input formControlName="price" type="number" placeholder="Price (₹)" required min="0" step="0.01" />
+              <div class="error-message" *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched">
+                Valid price is required
+              </div>
+            </div>
+            <div class="form-group">
+              <input formControlName="quantity" type="number" placeholder="Quantity" required min="1" />
+              <div class="error-message" *ngIf="productForm.get('quantity')?.invalid && productForm.get('quantity')?.touched">
+                Valid quantity is required
+              </div>
+            </div>
+          </div>
+          <button 
+            type="submit" 
+            [disabled]="productForm.invalid || isLoading" 
+            class="add-product-btn"
+            [class.loading]="isLoading">
+            <span *ngIf="!isLoading">
+              <i class="fas fa-plus"></i> Add Product
+            </span>
+            <span *ngIf="isLoading">
+              <i class="fas fa-spinner fa-spin"></i> Adding Product...
+            </span>
+          </button>
+        </form>
+      </div>
+    </section>
+    </ng-container>
+
+    <ng-container *ngIf="isBuyer">
+    <section class="buyer-section">
+      <h2>
+        <i class="fas fa-shopping-basket"></i>
+        Available Products
+      </h2>
+      <div class="products-grid buyer-grid">
+        <ng-container *ngIf="products$ | async as products">
+          <div *ngFor="let product of products" class="buyer-product-card">
+          <div class="product-image" *ngIf="product.imageUrl">
+            <img [src]="product.imageUrl" [alt]="product.name">
+          </div>
+          <div class="product-image placeholder" *ngIf="!product.imageUrl">
+            <i class="fas fa-image"></i>
+          </div>
+          <div class="product-details">
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-description">{{ product.description }}</div>
+            <div class="product-price-qty">
+              <span class="price">
+                <i class="fas fa-tag"></i> ₹{{ product.price }}
+              </span>
+              <span class="stock" [class.low-stock]="product.quantity < 5">
+                <i class="fas fa-boxes"></i> {{ product.quantity }} in stock
+              </span>
+            </div>
+          </div>
+          <ng-container *ngIf="buyForms[product.id] as buyForm">
+            <form [formGroup]="buyForm" (ngSubmit)="onBuyProduct(product.id)" class="buy-form">
+            <div class="quantity-selector">
+              <label>Quantity:</label>
+              <input formControlName="quantity" 
+                     type="number" 
+                     min="1" 
+                     [max]="product.quantity" 
+                     placeholder="Qty" 
+                     required />
+            </div>
+      <button type="submit" 
+        [disabled]="buyForm.invalid || product.quantity === 0"
+                    [class.loading]="isLoading"
+                    class="buy-btn">
+              <i class="fas fa-shopping-cart"></i>
+              {{ product.quantity === 0 ? 'Out of Stock' : 'Buy Now' }}
+            </button>
+            </form>
+          </ng-container>
+        </div>
+        </ng-container>
+      </div>
+      <div *ngIf="buyMessage" class="buy-message">
+        <i class="fas fa-check-circle"></i>
+        {{ buyMessage }}
+      </div>
+    </section>
+    </ng-container>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="dashboard-loading" style="text-align:center;padding:3rem;color:#666;">
+      <p>Loading dashboard…</p>
+    </div>
+  </ng-template>
+</div>
